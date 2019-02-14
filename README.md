@@ -1,1 +1,1 @@
-# spring-recipe-v4-reactive
+# spring-recipe-v3-mongo
