@@ -1,31 +1,29 @@
 package com.faizal.springrecipe.services;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.springframework.stereotype.Service;
 
 import com.faizal.springrecipe.commands.UnitOfMeasureCommand;
 import com.faizal.springrecipe.converters.UnitOfMeasureToUnitOfMeasureCommand;
-import com.faizal.springrecipe.repositories.UnitOfMeasureRepository;
+import com.faizal.springrecipe.repositories.reactive.UnitOfMeasureReactiveRepository;
+
+import reactor.core.publisher.Flux;
 
 @Service
 public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
 
-	private final UnitOfMeasureRepository unitOfMeasureRepository;
+	private final UnitOfMeasureReactiveRepository unitOfMeasureRepository;
 	private final UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand;
 
-	public UnitOfMeasureServiceImpl(UnitOfMeasureRepository unitOfMeasureRepository,
+	public UnitOfMeasureServiceImpl(UnitOfMeasureReactiveRepository unitOfMeasureRepository,
 			UnitOfMeasureToUnitOfMeasureCommand unitOfMeasureToUnitOfMeasureCommand) {
 		this.unitOfMeasureRepository = unitOfMeasureRepository;
 		this.unitOfMeasureToUnitOfMeasureCommand = unitOfMeasureToUnitOfMeasureCommand;
 	}
 
 	@Override
-	public Set<UnitOfMeasureCommand> listAllUoms() {
+	public Flux<UnitOfMeasureCommand> listAllUoms() {
 
-		return StreamSupport.stream(unitOfMeasureRepository.findAll().spliterator(), false)
-				.map(unitOfMeasureToUnitOfMeasureCommand::convert).collect(Collectors.toSet());
+		return unitOfMeasureRepository.findAll()
+				.map(unitOfMeasureToUnitOfMeasureCommand::convert);
 	}
 }
