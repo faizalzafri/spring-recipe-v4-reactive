@@ -2,11 +2,13 @@ package com.faizal.springrecipe.services;
 
 import com.faizal.springrecipe.commands.IngredientCommand;
 
+import reactor.core.publisher.Mono;
+
 public interface IngredientService {
 
-	IngredientCommand findByRecipeIdAndIngredientId(String recipeId, String ingredientId);
+	Mono<IngredientCommand> findByRecipeIdAndIngredientId(String recipeId, String ingredientId);
 
-	IngredientCommand save(IngredientCommand command);
+	Mono<IngredientCommand> save(IngredientCommand command);
 
-	void deleteById(String recipeId, String idToDelete);
+	Mono<Void> deleteById(String recipeId, String idToDelete);
 }
