@@ -32,13 +32,12 @@ public class UnitOfMeasureRepositoryIT {
 	public void setUp() throws Exception {
 
 		recipeRepository.deleteAll();
-		unitOfMeasureRepository.deleteAll();
-		categoryRepository.deleteAll();
+        unitOfMeasureRepository.deleteAll();
+        categoryRepository.deleteAll();
 
-		RecipeBootstrap recipeBootstrap = new RecipeBootstrap(categoryRepository, recipeRepository,
-				unitOfMeasureRepository);
+        RecipeBootstrap recipeBootstrap = new RecipeBootstrap(categoryRepository, recipeRepository, unitOfMeasureRepository);
 
-		recipeBootstrap.onApplicationEvent(null);
+        recipeBootstrap.onApplicationEvent(null);
 	}
 
 	@Test
