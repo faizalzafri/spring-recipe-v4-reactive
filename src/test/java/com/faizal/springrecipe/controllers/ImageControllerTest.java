@@ -25,6 +25,8 @@ import com.faizal.springrecipe.commands.RecipeCommand;
 import com.faizal.springrecipe.services.ImageService;
 import com.faizal.springrecipe.services.RecipeService;
 
+import reactor.core.publisher.Mono;
+
 public class ImageControllerTest {
 
 	@Mock
@@ -52,7 +54,7 @@ public class ImageControllerTest {
 		RecipeCommand command = new RecipeCommand();
 		command.setId("1");
 
-		when(recipeService.findCommandById(anyString())).thenReturn(command);
+		when(recipeService.findCommandById(anyString())).thenReturn(Mono.just(command));
 
 		// when
 		mockMvc.perform(get("/recipe/1/image")).andExpect(status().isOk()).andExpect(model().attributeExists("recipe"));
@@ -90,7 +92,7 @@ public class ImageControllerTest {
 
 		command.setImage(bytesBoxed);
 
-		when(recipeService.findCommandById(anyString())).thenReturn(command);
+		when(recipeService.findCommandById(anyString())).thenReturn(Mono.just(command));
 
 		// when
 		MockHttpServletResponse response = mockMvc.perform(get("/recipe/1/recipeimage")).andExpect(status().isOk())

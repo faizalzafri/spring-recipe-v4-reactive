@@ -1,19 +1,20 @@
 package com.faizal.springrecipe.services;
 
-import java.util.Set;
-
 import com.faizal.springrecipe.commands.RecipeCommand;
 import com.faizal.springrecipe.domain.Recipe;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 public interface RecipeService {
 
-	Set<Recipe> findAll();
+	Flux<Recipe> findAll();
 
-	Recipe findById(String id);
+	Mono<Recipe> findById(String id);
 
-	RecipeCommand findCommandById(String id);
+	Mono<RecipeCommand> findCommandById(String id);
 
-	RecipeCommand save(RecipeCommand command);
+	Mono<RecipeCommand> save(RecipeCommand command);
 
 	void deleteById(String idToDelete);
 }
