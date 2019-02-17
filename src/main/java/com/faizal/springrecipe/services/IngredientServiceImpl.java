@@ -26,17 +26,14 @@ public class IngredientServiceImpl implements IngredientService {
 	private final RecipeReactiveRepository recipeReactiveRepository;
 	private final UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository;
 
-	private final RecipeRepository recipeRepository;
-
 	public IngredientServiceImpl(IngredientToIngredientCommand ingredientToIngredientCommand,
 			IngredientCommandToIngredient ingredientCommandToIngredient,
 			RecipeReactiveRepository recipeReactiveRepository,
-			UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository, RecipeRepository recipeRepository) {
+			UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository) {
 		this.ingredientToIngredientCommand = ingredientToIngredientCommand;
 		this.ingredientCommandToIngredient = ingredientCommandToIngredient;
 		this.recipeReactiveRepository = recipeReactiveRepository;
 		this.unitOfMeasureReactiveRepository = unitOfMeasureReactiveRepository;
-		this.recipeRepository = recipeRepository;
 	}
 
 	@Override
@@ -58,36 +55,40 @@ public class IngredientServiceImpl implements IngredientService {
 
 	@Override
 	public Mono<IngredientCommand> save(IngredientCommand command) {
-		Optional<Recipe> recipeOptional = recipeRepository.findById(command.getRecipeId());
-
-		if (!recipeOptional.isPresent()) {
-
-			// todo toss error if not found!
+		Recipe recipe = recipeReactiveRepository.findById(command.getRecipeId()).block();
+		// if recipe for given ingredient is not found return new recipe
+		if (recipe == null) {
+			
 			log.error("Recipe not found for id: " + command.getRecipeId());
 			return Mono.just(new IngredientCommand());
+			
 		} else {
-			Recipe recipe = recipeOptional.get();
-
+			
+			// if recipe is found
+			// iterate through ingredient list and find the one which is requested to be save or update
+			
 			Optional<Ingredient> ingredientOptional = recipe.getIngredients().stream()
 					.filter(ingredient -> ingredient.getId().equals(command.getId())).findFirst();
-
+			
+			// create ingredient object
+			
 			if (ingredientOptional.isPresent()) {
 				Ingredient ingredientFound = ingredientOptional.get();
 				ingredientFound.setDescription(command.getDescription());
 				ingredientFound.setAmount(command.getAmount());
 				ingredientFound.setUom(unitOfMeasureReactiveRepository.findById(command.getUom().getId()).block());
-
-				// .orElseThrow(() -> new RuntimeException("UOM NOT FOUND"))); //todo address
-				// this
+				
+				// if found ingredient doesn't have uom throw exception
 				if (ingredientFound.getUom() == null) {
 					new RuntimeException("UOM NOT FOUND");
 				}
 			} else {
-				// add new Ingredient
-				Ingredient ingredient = ingredientCommandToIngredient.convert(command);
-				recipe.addIngredient(ingredient);
+				
+				// add recieved Ingredient to recipe 
+				recipe.addIngredient(ingredientCommandToIngredient.convert(command));
 			}
 
+			// save the recipe
 			Recipe savedRecipe = recipeReactiveRepository.save(recipe).block();
 
 			Optional<Ingredient> savedIngredientOptional = savedRecipe.getIngredients().stream()
@@ -108,8 +109,7 @@ public class IngredientServiceImpl implements IngredientService {
 			// todo check for fail
 
 			// enhance with id value
-			IngredientCommand ingredientCommandSaved = ingredientToIngredientCommand
-					.convert(savedIngredientOptional.get());
+			IngredientCommand ingredientCommandSaved = ingredientToIngredientCommand.convert(savedIngredientOptional.get());
 			ingredientCommandSaved.setRecipeId(recipe.getId());
 
 			return Mono.just(ingredientCommandSaved);
@@ -122,7 +122,7 @@ public class IngredientServiceImpl implements IngredientService {
 
 		log.debug("Deleting ingredient: " + recipeId + ":" + idToDelete);
 
-		Recipe recipe = recipeRepository.findById(recipeId).get();
+		Recipe recipe = recipeReactiveRepository.findById(recipeId).block();
 
 		if (recipe != null) {
 
@@ -135,7 +135,7 @@ public class IngredientServiceImpl implements IngredientService {
 				log.debug("found Ingredient");
 
 				recipe.getIngredients().remove(ingredientOptional.get());
-				recipeRepository.save(recipe);
+				recipeReactiveRepository.save(recipe);
 			}
 		} else {
 			log.debug("Recipe Id Not found. Id:" + recipeId);
