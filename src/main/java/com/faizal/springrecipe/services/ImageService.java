@@ -2,7 +2,9 @@ package com.faizal.springrecipe.services;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import reactor.core.publisher.Mono;
+
 public interface ImageService {
 
-	void save(String recipeId, MultipartFile file);
+	Mono<Void> save(String recipeId, MultipartFile file);
 }
